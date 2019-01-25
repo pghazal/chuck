@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -15,6 +17,10 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp3Version"
     implementation 'nl.qbusict:cupboard:2.2.0'
     implementation "com.android.support:design:$supportLibVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+repositories {
+    mavenCentral()
+}
