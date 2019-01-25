@@ -28,13 +28,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
+import android.view.*;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
@@ -48,7 +42,8 @@ public class TransactionListFragment extends Fragment implements
     private OnListFragmentInteractionListener listener;
     private TransactionAdapter adapter;
 
-    public TransactionListFragment() {}
+    public TransactionListFragment() {
+    }
 
     public static TransactionListFragment newInstance() {
         return new TransactionListFragment();
@@ -129,11 +124,11 @@ public class TransactionListFragment extends Fragment implements
         loader.setUri(ChuckContentProvider.TRANSACTION_URI);
         if (!TextUtils.isEmpty(currentFilter)) {
             if (TextUtils.isDigitsOnly(currentFilter)) {
-                loader.setSelection("responseCode LIKE ?");
-                loader.setSelectionArgs(new String[]{ currentFilter + "%" });
+                loader.setSelection("responseCode LIKE ? OR path LIKE ?");
+                loader.setSelectionArgs(new String[]{currentFilter + "%", "%" + currentFilter + "%"});
             } else {
                 loader.setSelection("path LIKE ?");
-                loader.setSelectionArgs(new String[]{ "%" + currentFilter + "%" });
+                loader.setSelectionArgs(new String[]{"%" + currentFilter + "%"});
             }
         }
         loader.setProjection(HttpTransaction.PARTIAL_PROJECTION);
