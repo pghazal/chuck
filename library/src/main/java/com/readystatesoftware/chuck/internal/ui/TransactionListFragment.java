@@ -34,6 +34,9 @@ import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
+import com.readystatesoftware.chuck.internal.support.SettingsManager;
+
+import java.util.ArrayList;
 
 public class TransactionListFragment extends Fragment implements
         SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<Cursor> {
@@ -41,6 +44,8 @@ public class TransactionListFragment extends Fragment implements
     private String currentFilter;
     private OnListFragmentInteractionListener listener;
     private TransactionAdapter adapter;
+
+    private SettingsManager settingsManager;
 
     public TransactionListFragment() {
     }
@@ -53,6 +58,8 @@ public class TransactionListFragment extends Fragment implements
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        settingsManager = new SettingsManager(getContext());
     }
 
     @Override
@@ -113,6 +120,11 @@ public class TransactionListFragment extends Fragment implements
         } else if (item.getItemId() == R.id.browse_sql) {
             SQLiteUtils.browseDatabase(getContext());
             return true;
+        } else if (item.getItemId() == R.id.settings) {
+            if (getContext() != null) {
+                SettingsActivity.Companion.start(getContext());
+            }
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -122,18 +134,74 @@ public class TransactionListFragment extends Fragment implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader loader = new CursorLoader(getContext());
         loader.setUri(ChuckContentProvider.TRANSACTION_URI);
-        if (!TextUtils.isEmpty(currentFilter)) {
-            if (TextUtils.isDigitsOnly(currentFilter)) {
-                loader.setSelection("responseCode LIKE ? OR path LIKE ?");
-                loader.setSelectionArgs(new String[]{currentFilter + "%", "%" + currentFilter + "%"});
-            } else {
-                loader.setSelection("path LIKE ?");
-                loader.setSelectionArgs(new String[]{"%" + currentFilter + "%"});
+
+        StringBuilder finalSelection = new StringBuilder();
+        ArrayList<String> settingSelections = new ArrayList<>();
+
+        String searchSelection = "";
+        ArrayList<String> selectionArgs = new ArrayList<>();
+
+        if (settingsManager != null) {
+            if (settingsManager.isError400FilterEnabled()) {
+                settingSelections.add("responseCode LIKE ? ");
+                selectionArgs.add("4%");
+            }
+
+            if (settingsManager.isError500FilterEnabled()) {
+                settingSelections.add("responseCode LIKE ? ");
+                selectionArgs.add("5%");
             }
         }
+
+        if (!TextUtils.isEmpty(currentFilter)) {
+            if (TextUtils.isDigitsOnly(currentFilter)) {
+                searchSelection = "(responseCode LIKE ? OR path LIKE ?)";
+
+                selectionArgs.add(currentFilter + "%");
+                selectionArgs.add("%" + currentFilter + "%");
+            } else {
+                searchSelection = "(path LIKE ?)";
+                selectionArgs.add("%" + currentFilter + "%");
+            }
+        }
+
+        // Build Settings selection String
+        finalSelection.append(buildSettingsSelection(settingSelections));
+        finalSelection.append(searchSelection);
+
+        loader.setSelection(finalSelection.toString());
+        loader.setSelectionArgs(selectionArgs.toArray(new String[0]));
+
         loader.setProjection(HttpTransaction.PARTIAL_PROJECTION);
         loader.setSortOrder("requestDate DESC");
+
         return loader;
+    }
+
+    private String buildSettingsSelection(ArrayList<String> settingSelections) {
+        StringBuilder result = new StringBuilder();
+
+        if (settingSelections.size() > 0) {
+            result.append("(");
+        }
+
+        for (int i = 0; i < settingSelections.size(); i++) {
+            result.append(settingSelections.get(i));
+
+            if (i < settingSelections.size() - 1) {
+                result.append(" OR ");
+            }
+        }
+
+        if (settingSelections.size() > 0) {
+            result.append(")");
+
+            if (!TextUtils.isEmpty(currentFilter)) {
+                result.append(" AND ");
+            }
+        }
+
+        return result.toString();
     }
 
     @Override
