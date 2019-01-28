@@ -213,7 +213,7 @@ public final class ChuckInterceptor implements Interceptor {
             }
             transaction.setResponseContentLength(buffer.size());
 
-            if (responseBody.contentType().toString().toLowerCase().contains("json")) {
+            if (contentType != null && contentType.toString().toLowerCase().contains("json")) {
                 transaction.setMalformedJson(isMalformedJson(transaction));
             }
         }
