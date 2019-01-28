@@ -13,49 +13,56 @@ import java.util.*
 
 class ExportUtils(private val context: Context) {
 
-    fun export() {
-        if (isExternalStorageWritable()) {
-            val cursor = context.contentResolver.query(ChuckContentProvider.TRANSACTION_URI,
-                    null, null, null, null)
-                    ?: return
+    fun export(appExecutors: AppExecutors) {
+        appExecutors.diskIO().execute {
+            if (isExternalStorageWritable()) {
+                val cursor = context.contentResolver.query(ChuckContentProvider.TRANSACTION_URI,
+                        null, null, null, null) ?: return@execute
 
-            cursor.moveToFirst()
+                cursor.moveToFirst()
 
-            val transactions = LocalCupboard.getInstance().withCursor(cursor).list(HttpTransaction::class.java)
+                val transactions = LocalCupboard.getInstance().withCursor(cursor).list(HttpTransaction::class.java)
 
-            val directory = getPrivateStorageDirectory(context, "feeds-capture")
+                val directory = getPrivateStorageDirectory(context, "feeds-capture")
 
-            directory?.let {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.getDefault())
+                directory?.let {
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.getDefault())
 
-                for (transaction in transactions) {
-                    val prefix = dateFormat.format(Date())
+                    for (transaction in transactions) {
+                        val prefix = dateFormat.format(Date())
 
-                    val fileName = when {
-                        transaction.responseCode != null && transaction.responseCode >= 500 -> prefix + "_ERROR_500"
-                        transaction.responseCode != null && transaction.responseCode >= 400 -> prefix + "_ERROR_400"
-                        transaction.responseCode != null && transaction.malformedJson == 1 -> prefix + "_MALFORMED"
-                        else -> prefix
+                        val fileName = when {
+                            transaction.responseCode != null && transaction.responseCode >= 500 -> prefix + "_ERROR_500"
+                            transaction.responseCode != null && transaction.responseCode >= 400 -> prefix + "_ERROR_400"
+                            transaction.responseCode != null && transaction.malformedJson == 1 -> prefix + "_MALFORMED"
+                            else -> prefix
+                        }
+
+                        val file = File(it, "$fileName.txt")
+
+                        file.writeText(FormatUtils.getShareText(context, transaction))
                     }
 
-                    val file = File(it, "$fileName.txt")
-
-                    file.writeText(FormatUtils.getShareText(context, transaction))
+                    appExecutors.mainThread().execute {
+                        Toast.makeText(context, "All transactions logged successfully: check your 'feeds-capture' folder", Toast.LENGTH_LONG).show()
+                    }
                 }
 
-                Toast.makeText(context, "All transactions logged successfully: check your 'feeds-capture' folder", Toast.LENGTH_LONG).show()
+                cursor.close()
             }
-
-            cursor.close()
         }
     }
 
-    fun delete() {
-        if (isExternalStorageWritable()) {
-            val directory = getPrivateStorageDirectory(context, "feeds-capture")
-            directory?.deleteRecursively()
+    fun delete(appExecutors: AppExecutors) {
+        appExecutors.diskIO().execute {
+            if (isExternalStorageWritable()) {
+                val directory = getPrivateStorageDirectory(context, "feeds-capture")
+                directory?.deleteRecursively()
 
-            Toast.makeText(context, "All transactions logs deleted", Toast.LENGTH_SHORT).show()
+                appExecutors.mainThread().execute {
+                    Toast.makeText(context, "All transactions logs deleted", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
