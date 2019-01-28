@@ -1,8 +1,8 @@
 package com.readystatesoftware.chuck.internal.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import com.readystatesoftware.chuck.R
 
 class SettingsActivity : BaseChuckActivity() {
@@ -14,9 +14,9 @@ class SettingsActivity : BaseChuckActivity() {
 
     companion object {
 
-        fun start(context: Context) {
-            val intent = Intent(context, SettingsActivity::class.java)
-            context.startActivity(intent)
+        fun start(fragment: Fragment, requestCode: Int) {
+            val intent = Intent(fragment.context, SettingsActivity::class.java)
+            fragment.startActivityForResult(intent, requestCode)
         }
     }
 }

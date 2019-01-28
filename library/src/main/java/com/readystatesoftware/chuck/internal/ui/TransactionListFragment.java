@@ -16,6 +16,7 @@
 package com.readystatesoftware.chuck.internal.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -40,6 +41,8 @@ import java.util.ArrayList;
 
 public class TransactionListFragment extends Fragment implements
         SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static int ACTIVITY_REQUEST_CODE_SETTINGS = 1234;
 
     private String currentFilter;
     private OnListFragmentInteractionListener listener;
@@ -122,7 +125,7 @@ public class TransactionListFragment extends Fragment implements
             return true;
         } else if (item.getItemId() == R.id.settings) {
             if (getContext() != null) {
-                SettingsActivity.Companion.start(getContext());
+                SettingsActivity.Companion.start(this, ACTIVITY_REQUEST_CODE_SETTINGS);
             }
             return true;
         } else {
@@ -224,6 +227,15 @@ public class TransactionListFragment extends Fragment implements
         currentFilter = newText;
         getLoaderManager().restartLoader(0, null, this);
         return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ACTIVITY_REQUEST_CODE_SETTINGS) {
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
 
     public interface OnListFragmentInteractionListener {
