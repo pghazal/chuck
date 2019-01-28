@@ -18,7 +18,6 @@ package com.readystatesoftware.chuck.internal.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 
 public abstract class BaseChuckActivity extends AppCompatActivity {
@@ -49,5 +48,4 @@ public abstract class BaseChuckActivity extends AppCompatActivity {
         super.onPause();
         inForeground = false;
     }
-
 }
