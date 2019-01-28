@@ -32,6 +32,11 @@
         android:visible="true"
         app:showAsAction="never" />
     <item
+        android:id="@+id/export"
+        android:title="@string/chuck_export"
+        android:visible="true"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/browse_sql"
         android:title="@string/chuck_browse_sql_database"
         android:visible="false"

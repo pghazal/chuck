@@ -33,6 +33,7 @@ import android.view.*;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
+import com.readystatesoftware.chuck.internal.support.ExportUtils;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
 import com.readystatesoftware.chuck.internal.support.SettingsManager;
@@ -50,6 +51,8 @@ public class TransactionListFragment extends Fragment implements
 
     private SettingsManager settingsManager;
 
+    private ExportUtils exportUtils;
+
     public TransactionListFragment() {
     }
 
@@ -63,6 +66,7 @@ public class TransactionListFragment extends Fragment implements
         setHasOptionsMenu(true);
 
         settingsManager = new SettingsManager(getContext());
+        exportUtils = new ExportUtils(getContext());
     }
 
     @Override
@@ -119,6 +123,7 @@ public class TransactionListFragment extends Fragment implements
         if (item.getItemId() == R.id.clear) {
             getContext().getContentResolver().delete(ChuckContentProvider.TRANSACTION_URI, null, null);
             NotificationHelper.clearBuffer();
+            exportUtils.delete();
             return true;
         } else if (item.getItemId() == R.id.browse_sql) {
             SQLiteUtils.browseDatabase(getContext());
@@ -127,6 +132,9 @@ public class TransactionListFragment extends Fragment implements
             if (getContext() != null) {
                 SettingsActivity.Companion.start(this, ACTIVITY_REQUEST_CODE_SETTINGS);
             }
+            return true;
+        } else if (item.getItemId() == R.id.export) {
+            exportUtils.export();
             return true;
         } else {
             return super.onOptionsItemSelected(item);
