@@ -154,6 +154,11 @@ public class TransactionListFragment extends Fragment implements
                 settingSelections.add("responseCode LIKE ? ");
                 selectionArgs.add("5%");
             }
+
+            if (settingsManager.isErrorMalformedJsonFilterEnabled()) {
+                settingSelections.add("malformedJson LIKE ? ");
+                selectionArgs.add("1");
+            }
         }
 
         if (!TextUtils.isEmpty(currentFilter)) {

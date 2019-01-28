@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
@@ -83,6 +82,9 @@ class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHol
                 if (transaction.getStatus() == HttpTransaction.Status.Failed) {
                     holder.code.setText("!!!");
                 }
+
+                showMalformedJsonIfNeeded(holder, transaction);
+
                 setStatusColor(holder, transaction);
                 holder.transaction = transaction;
                 holder.view.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +95,12 @@ class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHol
                         }
                     }
                 });
+            }
+
+            private void showMalformedJsonIfNeeded(ViewHolder holder, HttpTransaction transaction) {
+                Integer malformedJson = transaction.getMalformedJson();
+                holder.malformedJson.setVisibility(
+                        malformedJson != null && malformedJson == 1 ? View.VISIBLE : View.GONE);
             }
 
             private void setStatusColor(ViewHolder holder, HttpTransaction transaction) {
@@ -147,6 +155,7 @@ class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHol
         public final TextView duration;
         public final TextView size;
         public final ImageView ssl;
+        public final ImageView malformedJson;
         HttpTransaction transaction;
 
         ViewHolder(View view) {
@@ -159,6 +168,7 @@ class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHol
             duration = (TextView) view.findViewById(R.id.duration);
             size = (TextView) view.findViewById(R.id.size);
             ssl = (ImageView) view.findViewById(R.id.ssl);
+            malformedJson = (ImageView) view.findViewById(R.id.malformedJson);
         }
     }
 }

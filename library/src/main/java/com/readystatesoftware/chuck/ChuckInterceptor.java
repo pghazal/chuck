@@ -19,12 +19,20 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
+import com.readystatesoftware.chuck.internal.support.JsonConvertor;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.RetentionManager;
+import okhttp3.*;
+import okhttp3.internal.http.HttpHeaders;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.GzipSource;
+import okio.Okio;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -32,19 +40,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import okhttp3.Headers;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okhttp3.internal.http.HttpHeaders;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.GzipSource;
-import okio.Okio;
 
 /**
  * An OkHttp Interceptor which persists and displays HTTP activity in your application for later inspection.
@@ -94,6 +89,7 @@ public final class ChuckInterceptor implements Interceptor {
      * Control whether a notification is shown while HTTP activity is recorded.
      *
      * @param show true to show a notification, false to suppress it.
+     *
      * @return The {@link ChuckInterceptor} instance.
      */
     public ChuckInterceptor showNotification(boolean show) {
@@ -106,18 +102,20 @@ public final class ChuckInterceptor implements Interceptor {
      * Warning: setting this value too high may cause unexpected results.
      *
      * @param max the maximum length (in bytes) for request/response content.
+     *
      * @return The {@link ChuckInterceptor} instance.
      */
     public ChuckInterceptor maxContentLength(long max) {
         this.maxContentLength = max;
         return this;
     }
-  
+
     /**
      * Set the retention period for HTTP transaction data captured by this interceptor.
      * The default is one week.
      *
      * @param period the peroid for which to retain HTTP transaction data.
+     *
      * @return The {@link ChuckInterceptor} instance.
      */
     public ChuckInterceptor retainDataFor(Period period) {
@@ -125,7 +123,8 @@ public final class ChuckInterceptor implements Interceptor {
         return this;
     }
 
-    @Override public Response intercept(Chain chain) throws IOException {
+    @Override
+    public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
         RequestBody requestBody = request.body();
@@ -213,11 +212,26 @@ public final class ChuckInterceptor implements Interceptor {
                 transaction.setResponseBodyIsPlainText(false);
             }
             transaction.setResponseContentLength(buffer.size());
+
+            if (responseBody.contentType().toString().toLowerCase().contains("json")) {
+                transaction.setMalformedJson(isMalformedJson(transaction));
+            }
         }
 
         update(transaction, transactionUri);
 
         return response;
+    }
+
+    private Integer isMalformedJson(HttpTransaction transaction) {
+        try {
+            JsonParser jp = new JsonParser();
+            JsonElement je = jp.parse(transaction.getResponseBody());
+            String result = JsonConvertor.getInstance().toJson(je);
+            return 0;
+        } catch (Exception e) {
+            return 1;
+        }
     }
 
     private Uri create(HttpTransaction transaction) {

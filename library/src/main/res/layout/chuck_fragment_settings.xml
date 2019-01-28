@@ -40,6 +40,7 @@
         android:id="@+id/errorMalformedJsonSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_malformed_json_error"
         android:paddingStart="20dp"
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
