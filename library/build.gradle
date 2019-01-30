@@ -20,7 +20,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-apply from: rootProject.file('gradle/publish.gradle')
+apply from: rootProject.file('gradle/upload.gradle')
 
 repositories {
     mavenCentral()
