@@ -17,14 +17,15 @@ package com.readystatesoftware.chuck.internal.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 
@@ -35,8 +36,10 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
 
     private static final String ARG_TYPE = "type";
 
+    NestedScrollView scrollView;
     TextView headers;
     TextView body;
+    FloatingActionButton scrollDownFab;
 
     private int type;
     private HttpTransaction transaction;
@@ -63,14 +66,24 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chuck_fragment_transaction_payload, container, false);
+        scrollView = (NestedScrollView) view.findViewById(R.id.scrollView);
         headers = (TextView) view.findViewById(R.id.headers);
         body = (TextView) view.findViewById(R.id.body);
+        scrollDownFab = (FloatingActionButton) view.findViewById(R.id.scrollDownFab);
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        scrollDownFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
+
         populateUI();
     }
 
