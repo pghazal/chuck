@@ -17,13 +17,12 @@ package com.readystatesoftware.chuck.internal.support;
 
 import android.content.Context;
 import android.text.TextUtils;
-
+import android.util.Base64;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpHeader;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -53,9 +52,11 @@ public class FormatUtils {
 
     public static String formatByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
+        if (bytes < unit) {
+            return bytes + " B";
+        }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format(Locale.US, "%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
@@ -77,7 +78,7 @@ public class FormatUtils {
             Source xmlSource = new SAXSource(new InputSource(new ByteArrayInputStream(xml.getBytes())));
             StreamResult res = new StreamResult(new ByteArrayOutputStream());
             serializer.transform(xmlSource, res);
-            return new String(((ByteArrayOutputStream)res.getOutputStream()).toByteArray());
+            return new String(((ByteArrayOutputStream) res.getOutputStream()).toByteArray());
         } catch (Exception e) {
             return xml;
         }
@@ -90,7 +91,8 @@ public class FormatUtils {
         text += context.getString(R.string.chuck_protocol) + ": " + v(transaction.getProtocol()) + "\n";
         text += context.getString(R.string.chuck_status) + ": " + v(transaction.getStatus().toString()) + "\n";
         text += context.getString(R.string.chuck_response) + ": " + v(transaction.getResponseSummaryText()) + "\n";
-        text += context.getString(R.string.chuck_ssl) + ": " + v(context.getString(transaction.isSsl() ? R.string.chuck_yes : R.string.chuck_no)) + "\n";
+        text += context.getString(R.string.chuck_ssl) + ": "
+                + v(context.getString(transaction.isSsl() ? R.string.chuck_yes : R.string.chuck_no)) + "\n";
         text += "\n";
         text += context.getString(R.string.chuck_request_time) + ": " + v(transaction.getRequestDateString()) + "\n";
         text += context.getString(R.string.chuck_response_time) + ": " + v(transaction.getResponseDateString()) + "\n";
@@ -131,7 +133,7 @@ public class FormatUtils {
             }
             curlCmd += " -H " + "\"" + name + ": " + value + "\"";
         }
-        String requestBody = transaction.getRequestBody();
+        String requestBody = transaction.getHashedRequestBody();
         if (requestBody != null && requestBody.length() > 0) {
             // try to keep to a single line and use a subshell to preserve any line breaks
             curlCmd += " --data $'" + requestBody.replace("\n", "\\n") + "'";
@@ -142,5 +144,23 @@ public class FormatUtils {
 
     private static String v(String string) {
         return (string != null) ? string : "";
+    }
+
+    public static String encodeBase64(byte[] bytes) {
+        try {
+            return Base64.encodeToString(bytes, Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static byte[] decodeBase64(String value) {
+        try {
+            return Base64.decode(value, Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
     }
 }

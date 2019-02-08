@@ -24,6 +24,7 @@ import com.google.gson.JsonParser;
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
+import com.readystatesoftware.chuck.internal.support.FormatUtils;
 import com.readystatesoftware.chuck.internal.support.JsonConvertor;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.RetentionManager;
@@ -73,7 +74,7 @@ public final class ChuckInterceptor implements Interceptor {
     private final NotificationHelper notificationHelper;
     private RetentionManager retentionManager;
     private boolean showNotification;
-    private long maxContentLength = 250000L;
+    private long maxContentLength = Long.MAX_VALUE;
 
     /**
      * @param context The current Context.
@@ -157,7 +158,7 @@ public final class ChuckInterceptor implements Interceptor {
                 charset = contentType.charset(UTF8);
             }
             if (isPlaintext(buffer)) {
-                transaction.setRequestBody(readFromBuffer(buffer, charset));
+                transaction.setHashedRequestBody(readAndHashFromBuffer(buffer, charset));
             } else {
                 transaction.setResponseBodyIsPlainText(false);
             }
@@ -207,7 +208,7 @@ public final class ChuckInterceptor implements Interceptor {
                 }
             }
             if (isPlaintext(buffer)) {
-                transaction.setResponseBody(readFromBuffer(buffer.clone(), charset));
+                transaction.setHashedResponseBody(readAndHashFromBuffer(buffer.clone(), charset));
             } else {
                 transaction.setResponseBodyIsPlainText(false);
             }
@@ -225,8 +226,10 @@ public final class ChuckInterceptor implements Interceptor {
 
     private Integer isMalformedJson(HttpTransaction transaction) {
         try {
+            String unhashedBody = new String(FormatUtils.decodeBase64(transaction.getHashedResponseBody()));
+
             JsonParser jp = new JsonParser();
-            JsonElement je = jp.parse(transaction.getResponseBody());
+            JsonElement je = jp.parse(unhashedBody);
             String result = JsonConvertor.getInstance().toJson(je);
             return 0;
         } catch (Exception e) {
@@ -290,19 +293,16 @@ public final class ChuckInterceptor implements Interceptor {
         return "gzip".equalsIgnoreCase(contentEncoding);
     }
 
-    private String readFromBuffer(Buffer buffer, Charset charset) {
+    private String readAndHashFromBuffer(Buffer buffer, Charset charset) {
         long bufferSize = buffer.size();
         long maxBytes = Math.min(bufferSize, maxContentLength);
-        String body = "";
+        String hashedBody = "";
         try {
-            body = buffer.readString(maxBytes, charset);
+            hashedBody = FormatUtils.encodeBase64(buffer.readString(maxBytes, charset).getBytes());
         } catch (EOFException e) {
-            body += context.getString(R.string.chuck_body_unexpected_eof);
+            hashedBody += context.getString(R.string.chuck_body_unexpected_eof);
         }
-        if (bufferSize > maxContentLength) {
-            body += context.getString(R.string.chuck_body_content_truncated);
-        }
-        return body;
+        return hashedBody;
     }
 
     private BufferedSource getNativeSource(BufferedSource input, boolean isGzipped) {

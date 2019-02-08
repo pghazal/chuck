@@ -69,7 +69,7 @@ public class HttpTransaction {
     private Long requestContentLength;
     private String requestContentType;
     private String requestHeaders;
-    private String requestBody;
+    private String hashedRequestBody;
     private boolean requestBodyIsPlainText = true;
 
     private Integer responseCode;
@@ -79,7 +79,7 @@ public class HttpTransaction {
     private Long responseContentLength;
     private String responseContentType;
     private String responseHeaders;
-    private String responseBody;
+    private String hashedResponseBody;
     private boolean responseBodyIsPlainText = true;
 
     private Integer malformedJson = 0;
@@ -132,16 +132,17 @@ public class HttpTransaction {
         this.protocol = protocol;
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public String getHashedRequestBody() {
+        return hashedRequestBody;
     }
 
     public String getFormattedRequestBody() {
-        return formatBody(requestBody, requestContentType);
+        String body = new String(FormatUtils.decodeBase64(hashedRequestBody));
+        return formatBody(body, requestContentType);
     }
 
-    public void setRequestBody(String requestBody) {
-        this.requestBody = requestBody;
+    public void setHashedRequestBody(String hashedRequestBody) {
+        this.hashedRequestBody = hashedRequestBody;
     }
 
     public boolean requestBodyIsPlainText() {
@@ -168,16 +169,17 @@ public class HttpTransaction {
         this.requestContentType = requestContentType;
     }
 
-    public String getResponseBody() {
-        return responseBody;
+    public String getHashedResponseBody() {
+        return hashedResponseBody;
     }
 
     public String getFormattedResponseBody() {
-        return formatBody(responseBody, responseContentType);
+        String body = new String(FormatUtils.decodeBase64(hashedResponseBody));
+        return formatBody(body, responseContentType);
     }
 
-    public void setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
+    public void setHashedResponseBody(String hashedResponseBody) {
+        this.hashedResponseBody = hashedResponseBody;
     }
 
     public boolean responseBodyIsPlainText() {
