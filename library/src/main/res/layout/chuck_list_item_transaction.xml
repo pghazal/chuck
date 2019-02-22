@@ -101,7 +101,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="Malformed JSON"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_malformed_json_error" />
+            android:src="@drawable/chuck_ic_malformed_json_error" />
 
     </LinearLayout>
 

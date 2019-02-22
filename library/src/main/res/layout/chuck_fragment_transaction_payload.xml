@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|top"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_arrow_down"
+        android:src="@drawable/chuck_ic_arrow_down"
         app:layout_anchor="@id/scrollView"
         app:layout_anchorGravity="top|right|end" />
 

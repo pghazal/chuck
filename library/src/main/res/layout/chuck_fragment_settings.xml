@@ -24,7 +24,7 @@
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
         android:paddingBottom="12dp"
-        android:text="@string/settings_error_400" />
+        android:text="@string/chuck_settings_error_400" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/error500Switch"
@@ -34,17 +34,17 @@
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
         android:paddingBottom="12dp"
-        android:text="@string/settings_error_500" />
+        android:text="@string/chuck_settings_error_500" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/errorMalformedJsonSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableStart="@drawable/ic_malformed_json_error"
+        android:drawableStart="@drawable/chuck_ic_malformed_json_error"
         android:paddingStart="20dp"
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
         android:paddingBottom="12dp"
-        android:text="@string/settings_error_malformed_json" />
+        android:text="@string/chuck_settings_error_malformed_json" />
 
 </LinearLayout>
