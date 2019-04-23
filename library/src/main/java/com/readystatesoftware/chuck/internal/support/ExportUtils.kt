@@ -29,7 +29,8 @@ class ExportUtils(private val context: Context) {
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.getDefault())
 
                     for (transaction in transactions) {
-                        val prefix = dateFormat.format(Date())
+                        val formattedUrl = transaction.url.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_")
+                        val prefix = dateFormat.format(Date()) + "_$formattedUrl"
 
                         val fileName = when {
                             transaction.responseCode != null && transaction.responseCode >= 500 -> prefix + "_ERROR_500"
