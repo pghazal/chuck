@@ -26,7 +26,7 @@ class ExportUtils(private val context: Context) {
                 val directory = getPrivateStorageDirectory(context, "feeds-capture")
 
                 directory?.let {
-                    val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.getDefault())
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault())
 
                     for (transaction in transactions) {
                         val formattedUrl = transaction.url.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_")
