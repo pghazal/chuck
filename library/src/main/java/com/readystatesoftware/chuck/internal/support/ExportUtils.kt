@@ -39,9 +39,9 @@ class ExportUtils(private val context: Context) {
                             else -> prefix
                         }
 
-                        val file = File(it, "$fileName.txt")
+                        val file = File(it, "$fileName.json")
 
-                        file.writeText(FormatUtils.getShareText(context, transaction))
+                        file.writeText(FormatUtils.getJsonFormattedShareText(context, transaction).toString())
                     }
 
                     appExecutors.mainThread().execute {

@@ -136,8 +136,12 @@ public class HttpTransaction {
         return hashedRequestBody;
     }
 
+    public String getRequestBody() {
+        return new String(FormatUtils.decodeBase64(hashedRequestBody));
+    }
+
     public String getFormattedRequestBody() {
-        String body = new String(FormatUtils.decodeBase64(hashedRequestBody));
+        String body = getRequestBody();
         return formatBody(body, requestContentType);
     }
 
@@ -173,8 +177,12 @@ public class HttpTransaction {
         return hashedResponseBody;
     }
 
+    public String getResponseBody() {
+        return new String(FormatUtils.decodeBase64(hashedResponseBody));
+    }
+
     public String getFormattedResponseBody() {
-        String body = new String(FormatUtils.decodeBase64(hashedResponseBody));
+        String body = getResponseBody();
         return formatBody(body, responseContentType);
     }
 

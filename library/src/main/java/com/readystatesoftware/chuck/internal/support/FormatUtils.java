@@ -23,6 +23,8 @@ import com.google.gson.JsonParser;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpHeader;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -45,6 +47,20 @@ public class FormatUtils {
             for (HttpHeader header : httpHeaders) {
                 out += ((withMarkup) ? "<b>" : "") + header.getName() + ": " + ((withMarkup) ? "</b>" : "") +
                         header.getValue() + ((withMarkup) ? "<br />" : "\n");
+            }
+        }
+        return out;
+    }
+
+    public static JSONObject getJsonFormattedHeaders(List<HttpHeader> httpHeaders) {
+        JSONObject out = new JSONObject();
+        if (httpHeaders != null) {
+            for (HttpHeader header : httpHeaders) {
+                try {
+                    out.put(header.getName(), header.getValue());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return out;
@@ -118,6 +134,46 @@ public class FormatUtils {
         text += (transaction.responseBodyIsPlainText()) ? v(transaction.getFormattedResponseBody()) :
                 context.getString(R.string.chuck_body_omitted);
         return text;
+    }
+
+    public static JSONObject getJsonFormattedShareText(Context context, HttpTransaction transaction) {
+        JSONObject root = new JSONObject();
+
+        try {
+            JSONObject info = new JSONObject();
+            info.put(context.getString(R.string.chuck_url), v(transaction.getUrl()));
+            info.put(context.getString(R.string.chuck_method), v(transaction.getMethod()));
+            info.put(context.getString(R.string.chuck_protocol), v(transaction.getProtocol()));
+            info.put(context.getString(R.string.chuck_status), v(transaction.getStatus().toString()));
+            info.put(context.getString(R.string.chuck_response), v(transaction.getResponseSummaryText()));
+            info.put(context.getString(R.string.chuck_ssl), v(context.getString(transaction.isSsl() ? R.string.chuck_yes : R.string.chuck_no)));
+            info.put(context.getString(R.string.chuck_request_time), v(transaction.getRequestDateString()));
+            info.put(context.getString(R.string.chuck_response_time), v(transaction.getResponseDateString()));
+            info.put(context.getString(R.string.chuck_duration), v(transaction.getDurationString()));
+            info.put(context.getString(R.string.chuck_request_size), v(transaction.getRequestSizeString()));
+            info.put(context.getString(R.string.chuck_response_size), v(transaction.getResponseSizeString()));
+            info.put(context.getString(R.string.chuck_total_size), v(transaction.getTotalSizeString()));
+
+            root.put("info", info);
+
+            JSONObject request = new JSONObject();
+            request.put("request_headers", getJsonFormattedHeaders(transaction.getRequestHeaders()));
+            request.put("request_body", (transaction.requestBodyIsPlainText()) ? new JSONObject(v(transaction.getRequestBody())) :
+                    context.getString(R.string.chuck_body_omitted));
+
+            root.put("request", request);
+
+            JSONObject response = new JSONObject();
+            response.put("response_headers", getJsonFormattedHeaders(transaction.getResponseHeaders()));
+            response.put("response_body", (transaction.responseBodyIsPlainText()) ? new JSONObject(v(transaction.getResponseBody())) :
+                    context.getString(R.string.chuck_body_omitted));
+
+            root.put("response", response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return root;
     }
 
     public static String getShareCurlCommand(HttpTransaction transaction) {
