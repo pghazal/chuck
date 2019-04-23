@@ -2,6 +2,7 @@ package com.readystatesoftware.chuck.internal.support
 
 import android.content.Context
 import android.os.Environment
+import android.support.annotation.Nullable
 import android.widget.Toast
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider
 import com.readystatesoftware.chuck.internal.data.HttpTransaction
@@ -13,11 +14,11 @@ import java.util.*
 
 class ExportUtils(private val context: Context) {
 
-    fun export(appExecutors: AppExecutors) {
+    fun export(appExecutors: AppExecutors, @Nullable mProjection: Array<String>, @Nullable mSelection: String, @Nullable mSelectionArgs: Array<String>, @Nullable mSortOrder: String) {
         appExecutors.diskIO().execute {
             if (isExternalStorageWritable()) {
                 val cursor = context.contentResolver.query(ChuckContentProvider.TRANSACTION_URI,
-                        null, null, null, null) ?: return@execute
+                        mProjection, mSelection, mSelectionArgs, mSortOrder) ?: return@execute
 
                 cursor.moveToFirst()
 
@@ -29,7 +30,7 @@ class ExportUtils(private val context: Context) {
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault())
 
                     for (transaction in transactions) {
-                        val formattedUrl = transaction.url.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_")
+                        val formattedUrl = transaction.path?.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_") ?: ""
                         val prefix = dateFormat.format(Date()) + "_$formattedUrl"
 
                         val fileName = when {

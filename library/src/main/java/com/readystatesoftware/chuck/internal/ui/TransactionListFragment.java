@@ -50,6 +50,10 @@ public class TransactionListFragment extends Fragment implements
 
     private AppExecutors appExecutors;
     private ExportUtils exportUtils;
+    private String mSelection;
+    private String[] mSelectionArgs;
+    private String[] mProjection;
+    private String mSortOrder;
 
     public TransactionListFragment() {
     }
@@ -133,7 +137,7 @@ public class TransactionListFragment extends Fragment implements
             }
             return true;
         } else if (item.getItemId() == R.id.export) {
-            exportUtils.export(appExecutors);
+            exportUtils.export(appExecutors, mProjection, mSelection, mSelectionArgs, mSortOrder);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -184,11 +188,16 @@ public class TransactionListFragment extends Fragment implements
         finalSelection.append(buildSettingsSelection(settingSelections));
         finalSelection.append(searchSelection);
 
-        loader.setSelection(finalSelection.toString());
-        loader.setSelectionArgs(selectionArgs.toArray(new String[0]));
+        mSelection = finalSelection.toString();
+        mSelectionArgs = selectionArgs.toArray(new String[0]);
+        mProjection = HttpTransaction.PARTIAL_PROJECTION;
+        mSortOrder = "requestDate DESC";
 
-        loader.setProjection(HttpTransaction.PARTIAL_PROJECTION);
-        loader.setSortOrder("requestDate DESC");
+        loader.setSelection(mSelection);
+        loader.setSelectionArgs(mSelectionArgs);
+
+        loader.setProjection(mProjection);
+        loader.setSortOrder(mSortOrder);
 
         return loader;
     }
