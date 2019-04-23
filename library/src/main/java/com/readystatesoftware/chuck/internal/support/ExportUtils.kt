@@ -30,7 +30,12 @@ class ExportUtils(private val context: Context) {
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault())
 
                     for (transaction in transactions) {
-                        val formattedUrl = transaction.path?.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_") ?: ""
+                        var formattedUrl = transaction.path?.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_") ?: ""
+
+                        if (formattedUrl.length > 127) {
+                            formattedUrl = formattedUrl.substring(0, 127)
+                        }
+
                         val prefix = dateFormat.format(Date()) + "_$formattedUrl"
 
                         val fileName = when {
