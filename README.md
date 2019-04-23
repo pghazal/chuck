@@ -55,6 +55,15 @@ Chuck uses the following open source libraries:
 - [Gson](https://github.com/google/gson) - Copyright Google Inc.
 - [Cupboard](https://bitbucket.org/littlerobots/cupboard) - Copyright Little Robots.
 
+Bintray Upload
+--------------
+
+// If userid_bintray and apikey_bintray are filled into `local.properties`
+./gradlew clean build bintrayUpload
+
+// Otherwise
+./gradlew clean build bintrayUpload -PbintrayUser={userid_bintray} -PbintrayKey={apikey_bintray}
+
 License
 -------
 
