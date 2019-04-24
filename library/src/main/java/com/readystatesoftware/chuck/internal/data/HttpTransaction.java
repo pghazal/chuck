@@ -39,16 +39,31 @@ public class HttpTransaction {
     public static final String[] PARTIAL_PROJECTION = new String[]{
             "_id",
             "requestDate",
+            "responseDate",
             "tookMs",
+
+            "protocol",
             "method",
+            "url",
             "host",
             "path",
             "scheme",
+
             "requestContentLength",
+            "requestContentType",
+            "requestHeaders",
+            "hashedRequestBody",
+
             "responseCode",
+            "responseMessage",
             "error",
+
             "responseContentLength",
-            "malformedJson"
+            "responseContentType",
+            "responseHeaders",
+            "hashedResponseBody",
+
+            "malformedJson",
     };
 
     private static final SimpleDateFormat TIME_ONLY_FMT = new SimpleDateFormat("HH:mm:ss", Locale.US);
