@@ -158,14 +158,16 @@ public class FormatUtils {
 
             JSONObject request = new JSONObject();
             request.put("request_headers", getJsonFormattedHeaders(transaction.getRequestHeaders()));
-            request.put("request_body", (transaction.requestBodyIsPlainText()) ? new JSONObject(v(transaction.getRequestBody())) :
+            request.put("request_body", (transaction.requestBodyIsPlainText()
+                    && !TextUtils.isEmpty(transaction.getRequestBody())) ? new JSONObject(v(transaction.getRequestBody())) :
                     context.getString(R.string.chuck_body_omitted));
 
             root.put("request", request);
 
             JSONObject response = new JSONObject();
             response.put("response_headers", getJsonFormattedHeaders(transaction.getResponseHeaders()));
-            response.put("response_body", (transaction.responseBodyIsPlainText()) ? new JSONObject(v(transaction.getResponseBody())) :
+            response.put("response_body", (transaction.responseBodyIsPlainText()
+                    && !TextUtils.isEmpty(transaction.getResponseBody())) ? new JSONObject(v(transaction.getResponseBody())) :
                     context.getString(R.string.chuck_body_omitted));
 
             root.put("response", response);
